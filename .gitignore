@@ -25,6 +25,7 @@ model/Recon3D.xml
 model/Recon3D_301.mat
 model/vibrio_natriegens.json 
 model/ENGRO2.xml
+model/ENGRO2-v2.xml
 model/mitocore_v2.xml
 model/Human-GEM_v2.xml
 model/mcc101.xml

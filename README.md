@@ -132,3 +132,9 @@ _cf. Refer to the [documentation](https://sysbiolux.github.io/WILDkCAT/explanati
 ## Feedback & Improvements
 
 Contributions, suggestions, and feedback are very welcome! If you encounter any [issues](https://github.com/sysbiolux/WILDkCAT/issues), have ideas for new features, or notice room for improvement, feel free to open an issue or submit a pull request.
+
+## Cite us 
+
+If you use WILDkCAT in your research, please cite:
+
+> Escoffier H, Linster CL, Sauter T. WILDkCAT: extract, retrieve, and predict enzyme turnover numbers of constraint-based metabolic models. Bioinformatics (2026). [https://doi.org/10.1093/bioinformatics/btag510](https://doi.org/10.1093/bioinformatics/btag510)
