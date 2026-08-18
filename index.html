@@ -86,6 +86,11 @@
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
+        
+        <a href="#summary" class="md-skip">
+          Skip to content
+        </a>
+      
     </div>
     <div data-md-component="announce">
       
@@ -371,6 +376,19 @@
       
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="." class="md-nav__link md-nav__link--active">
         
   
@@ -382,6 +400,41 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      Summary
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#publication" class="md-nav__link">
+    <span class="md-ellipsis">
+      Publication
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -537,6 +590,7 @@
 
   <h1>Home</h1>
 
+<h2 id="summary">Summary</h2>
 <p><strong><a href="https://github.com/sysbiolux/WILDkCAT">WILDkCAT</a></strong> is a Python package that offers a comprehensive range of functions for extracting, retrieving and predicting enzyme kinetic data for a given metabolic model. The tool facilitates enzyme-constrained modelling by assigning specific kcat values to each combination of reaction, enzyme, and substrate(s).</p>
 <p>WILDkCAT integrates the <strong><a href="https://www.brenda-enzymes.org/">BRENDA</a></strong> and <strong><a href="https://sabiork.h-its.org/">SABIO-RK</a></strong> APIs to retrieve experimental values and <strong><a href="https://github.com/zchwang/CataPro">CataPro</a></strong> to predict missing values. It can be used with various enzyme-constrained metabolic modelling methods, such as <strong><a href="https://github.com/COBREXA/COBREXA.jl">COBREXA.jl</a></strong> and <strong><a href="https://github.com/SysBioChalmers/GECKO">GECKO</a></strong>, facilitating the seamless integration of kcat values into a given metabolic model.</p>
 <hr />
@@ -545,6 +599,11 @@
 <p align="center"> <img src="report_example.gif" alt="WILDkCAT Report Demo" width="700"/> </p>
 
 <hr />
+<h2 id="publication">Publication</h2>
+<p>WILDkCAT is described in our article published in <em>Bioinformatics</em>:</p>
+<blockquote>
+<p>Escoffier H, Linster CL, Sauter T. WILDkCAT: extract, retrieve, and predict enzyme turnover numbers of constraint-based metabolic models. Bioinformatics. (2026). <a href="doi:10.1093/bioinformatics/btag510">doi:10.1093/bioinformatics/btag510</a></p>
+</blockquote>
 
 
 

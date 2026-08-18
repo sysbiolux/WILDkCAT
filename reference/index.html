@@ -8170,7 +8170,11 @@ the integrated Catapro predicted kcat(s^-1) values.</p>
 <span class="normal">1059</span>
 <span class="normal">1060</span>
 <span class="normal">1061</span>
-<span class="normal">1062</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">report_final</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">final_df</span><span class="p">,</span> <span class="n">output_folder</span><span class="p">,</span> <span class="n">shader</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">1062</span>
+<span class="normal">1063</span>
+<span class="normal">1064</span>
+<span class="normal">1065</span>
+<span class="normal">1066</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">report_final</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">final_df</span><span class="p">,</span> <span class="n">output_folder</span><span class="p">,</span> <span class="n">shader</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generate a full HTML report summarizing retrieval results, including kcat distributions and coverage.</span>
 
@@ -8227,14 +8231,16 @@ the integrated Catapro predicted kcat(s^-1) values.</p>
             <span class="n">color_map</span> <span class="o">=</span> <span class="p">{</span>
                 <span class="s2">&quot;brenda&quot;</span><span class="p">:</span> <span class="s2">&quot;#55bb55&quot;</span><span class="p">,</span>   
                 <span class="s2">&quot;sabio_rk&quot;</span><span class="p">:</span> <span class="s2">&quot;#2277cc&quot;</span><span class="p">,</span> 
-                <span class="s2">&quot;catapro&quot;</span><span class="p">:</span> <span class="s2">&quot;#eedd00&quot;</span><span class="p">,</span>  
+                <span class="c1"># &quot;catapro&quot;: &quot;#eedd00&quot;,  </span>
+                <span class="s2">&quot;CataPro&quot;</span><span class="p">:</span> <span class="s2">&quot;#eedd00&quot;</span><span class="p">,</span>  
                 <span class="s2">&quot;Unknown&quot;</span><span class="p">:</span> <span class="s2">&quot;#dddddd&quot;</span> 
             <span class="p">}</span>
 
             <span class="n">label_map</span> <span class="o">=</span> <span class="p">{</span>
                 <span class="s2">&quot;brenda&quot;</span><span class="p">:</span> <span class="s2">&quot;Brenda&quot;</span><span class="p">,</span>
                 <span class="s2">&quot;sabio_rk&quot;</span><span class="p">:</span> <span class="s2">&quot;Sabio-RK&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;catapro&quot;</span><span class="p">:</span> <span class="s2">&quot;CataPro&quot;</span><span class="p">,</span>
+                <span class="c1"># &quot;catapro&quot;: &quot;CataPro&quot;,</span>
+                <span class="s2">&quot;CataPro&quot;</span><span class="p">:</span> <span class="s2">&quot;CataPro&quot;</span><span class="p">,</span>
                 <span class="s2">&quot;Unknown&quot;</span><span class="p">:</span> <span class="s2">&quot;Unknown&quot;</span>
             <span class="p">}</span>
 
@@ -8287,16 +8293,18 @@ the integrated Catapro predicted kcat(s^-1) values.</p>
     <span class="n">db_counts</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;db&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="s2">&quot;Unknown&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span>
     <span class="n">total_db</span> <span class="o">=</span> <span class="n">db_counts</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
 
-    <span class="c1"># Couleurs</span>
+    <span class="c1"># Colors</span>
     <span class="n">colors</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s2">&quot;brenda&quot;</span><span class="p">:</span> <span class="s2">&quot;#55bb55&quot;</span><span class="p">,</span>
         <span class="s2">&quot;sabio_rk&quot;</span><span class="p">:</span> <span class="s2">&quot;#2277cc&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;catapro&quot;</span><span class="p">:</span> <span class="s2">&quot;#eedd00&quot;</span><span class="p">,</span>
+        <span class="c1"># &quot;catapro&quot;: &quot;#eedd00&quot;,</span>
+        <span class="s2">&quot;CataPro&quot;</span><span class="p">:</span> <span class="s2">&quot;#eedd00&quot;</span><span class="p">,</span>
         <span class="s2">&quot;Unknown&quot;</span><span class="p">:</span> <span class="s2">&quot;#ddd&quot;</span>
     <span class="p">}</span>
 
-    <span class="c1"># Ordre imposé</span>
-    <span class="n">ordered_dbs</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;brenda&quot;</span><span class="p">,</span> <span class="s2">&quot;sabio_rk&quot;</span><span class="p">,</span> <span class="s2">&quot;catapro&quot;</span><span class="p">,</span> <span class="s2">&quot;Unknown&quot;</span><span class="p">]</span>
+    <span class="c1"># Order</span>
+    <span class="c1"># ordered_dbs = [&quot;brenda&quot;, &quot;sabio_rk&quot;, &quot;catapro&quot;, &quot;Unknown&quot;]</span>
+    <span class="n">ordered_dbs</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;brenda&quot;</span><span class="p">,</span> <span class="s2">&quot;sabio_rk&quot;</span><span class="p">,</span> <span class="s2">&quot;CataPro&quot;</span><span class="p">,</span> <span class="s2">&quot;Unknown&quot;</span><span class="p">]</span>
 
     <span class="n">progress_segments</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
     <span class="n">legend_items</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
@@ -9736,11 +9744,7 @@ including kcat value distribution and matching score repartition.</p>
 
             <details class="quote">
               <summary>Source code in <code>wildkcat/utils/generate_reports.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1276</span>
-<span class="normal">1277</span>
-<span class="normal">1278</span>
-<span class="normal">1279</span>
-<span class="normal">1280</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1280</span>
 <span class="normal">1281</span>
 <span class="normal">1282</span>
 <span class="normal">1283</span>
@@ -9844,7 +9848,11 @@ including kcat value distribution and matching score repartition.</p>
 <span class="normal">1381</span>
 <span class="normal">1382</span>
 <span class="normal">1383</span>
-<span class="normal">1384</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">report_shader</span><span class="p">():</span> 
+<span class="normal">1384</span>
+<span class="normal">1385</span>
+<span class="normal">1386</span>
+<span class="normal">1387</span>
+<span class="normal">1388</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">report_shader</span><span class="p">():</span> 
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return HTML and GLSL shader code for report background. Adapted from localthunk (https://localthunk.com)&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="s2">&quot;&quot;&quot;</span>
 <span class="s2">    &lt;!-- Background adapted from original work by localthunk (https://localthunk.com) --&gt;</span>
@@ -9975,17 +9983,17 @@ including kcat value distribution and matching score repartition.</p>
 
             <details class="quote">
               <summary>Source code in <code>wildkcat/utils/generate_reports.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1263</span>
-<span class="normal">1264</span>
-<span class="normal">1265</span>
-<span class="normal">1266</span>
-<span class="normal">1267</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1267</span>
 <span class="normal">1268</span>
 <span class="normal">1269</span>
 <span class="normal">1270</span>
 <span class="normal">1271</span>
 <span class="normal">1272</span>
-<span class="normal">1273</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">report_simple</span><span class="p">():</span>
+<span class="normal">1273</span>
+<span class="normal">1274</span>
+<span class="normal">1275</span>
+<span class="normal">1276</span>
+<span class="normal">1277</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">report_simple</span><span class="p">():</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return HTML code for report background.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="s2">&quot;&quot;&quot;</span>
 <span class="s2">    &lt;style&gt;</span>
@@ -10018,11 +10026,7 @@ including kcat value distribution and matching score repartition.</p>
 
             <details class="quote">
               <summary>Source code in <code>wildkcat/utils/generate_reports.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1065</span>
-<span class="normal">1066</span>
-<span class="normal">1067</span>
-<span class="normal">1068</span>
-<span class="normal">1069</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1069</span>
 <span class="normal">1070</span>
 <span class="normal">1071</span>
 <span class="normal">1072</span>
@@ -10213,7 +10217,11 @@ including kcat value distribution and matching score repartition.</p>
 <span class="normal">1257</span>
 <span class="normal">1258</span>
 <span class="normal">1259</span>
-<span class="normal">1260</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">report_style</span><span class="p">():</span>
+<span class="normal">1260</span>
+<span class="normal">1261</span>
+<span class="normal">1262</span>
+<span class="normal">1263</span>
+<span class="normal">1264</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">report_style</span><span class="p">():</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return CSS script for report style.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="s2">&quot;&quot;&quot;</span>
 <span class="s2">    &lt;style&gt;</span>
