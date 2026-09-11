@@ -810,14 +810,16 @@ def report_final(model, final_df, output_folder, shader=False) -> None:
             color_map = {
                 "brenda": "#55bb55",   
                 "sabio_rk": "#2277cc", 
-                "catapro": "#eedd00",  
+                # "catapro": "#eedd00",  
+                "CataPro": "#eedd00",  
                 "Unknown": "#dddddd" 
             }
 
             label_map = {
                 "brenda": "Brenda",
                 "sabio_rk": "Sabio-RK",
-                "catapro": "CataPro",
+                # "catapro": "CataPro",
+                "CataPro": "CataPro",
                 "Unknown": "Unknown"
             }
 
@@ -870,16 +872,18 @@ def report_final(model, final_df, output_folder, shader=False) -> None:
     db_counts = df["db"].fillna("Unknown").value_counts()
     total_db = db_counts.sum()
 
-    # Couleurs
+    # Colors
     colors = {
         "brenda": "#55bb55",
         "sabio_rk": "#2277cc",
-        "catapro": "#eedd00",
+        # "catapro": "#eedd00",
+        "CataPro": "#eedd00",
         "Unknown": "#ddd"
     }
 
-    # Ordre imposé
-    ordered_dbs = ["brenda", "sabio_rk", "catapro", "Unknown"]
+    # Order
+    # ordered_dbs = ["brenda", "sabio_rk", "catapro", "Unknown"]
+    ordered_dbs = ["brenda", "sabio_rk", "CataPro", "Unknown"]
 
     progress_segments = ""
     legend_items = ""
