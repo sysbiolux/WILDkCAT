@@ -6,13 +6,12 @@
 
 ---
 
-> [!IMPORTANT] 
+> [!WARNING] 
 >
-> **SABIO-RK API update**: SABIO-RK has recently changed its API, which is not backward compatible with the current WILDkCAT implementation.
+> **SABIO-RK API Update**: SABIO-RK has recently changed its API, which is not backward compatible with the current WILDkCAT implementation.
 > We are currently working on updating the retrieval pipeline to support the new API.
 > The update is taking longer than expected due to issues related to missing values and API request rate limits. <br>
 > **In the meantime, please use `database = brenda` when running the retrieval step.** <br>
-> We apologize for the inconvenience and appreciate your patience while we work on this update.
 
 ---
 
