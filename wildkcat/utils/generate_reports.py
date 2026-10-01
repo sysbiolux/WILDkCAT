@@ -753,25 +753,43 @@ def report_prediction_input(catapro_df, report_statistics, output_folder, shader
     logging.info(f"HTML report saved to '{report_path}'")
 
 
-def report_final(model, final_df, output_folder, shader=False) -> None:
+DB_COLORS = {"brenda": "#55bb55", "sabio_rk": "#2277cc"}
+DB_LABELS = {"brenda": "Brenda", "sabio_rk": "Sabio-RK"}
+ML_COLOR = "#eedd00"
+UNKNOWN_COLOR = "#dddddd"
+
+
+def _db_color(db):
+    if db in DB_COLORS:
+        return DB_COLORS[db]
+    return UNKNOWN_COLOR if db == "Unknown" else ML_COLOR
+
+
+def _db_label(db):
+    return DB_LABELS.get(db, db)
+
+
+def report_final(model, final_df, output_folder, shader=False) -> str:
     """
     Generate a full HTML report summarizing retrieval results, including kcat distributions and coverage.
 
     Parameters:
         model (cobra.Model): The metabolic model object containing reactions, metabolites, and genes.
-        final_df (pd.DataFrame): DataFrame containing the final kcat assignments from run_prediction_part2 function
-        
-    Returns: 
-        None: The function saves the generated HTML report to 'reports/general_report.html'.
+        final_df (pd.DataFrame): DataFrame containing the final kcat assignments from run_prediction_part2 or run_prediction function
+        output_folder (str): Folder where 'reports/general_report.html' is written.
+        shader (bool): Use the shader header instead of the simple one.
+
+    Returns:
+        str: Path of the generated HTML report.
     """
-    # Model information 
+    # Model information
     nb_model_reactions = len(model.reactions)
     nb_model_metabolites = len(model.metabolites)
     nb_model_genes = len(model.genes)
 
-
     df = final_df.copy()
     df["db"] = df["db"].fillna("Unknown")
+    df["kcat"] = pd.to_numeric(df["kcat"], errors="coerce")
     generated_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     # Utility to convert matplotlib figures to base64 <img>
@@ -783,12 +801,8 @@ def report_final(model, final_df, output_folder, shader=False) -> None:
         plt.close(fig)
         return f'<div class="plot-container"><img src="data:image/png;base64,{encoded}"></div>'
 
-    # Distribution plots
+    # Distribution plot
     def plot_kcat_distribution_stacked(column_name, title, source):
-        # Ensure numeric kcat
-        df[column_name] = pd.to_numeric(df[column_name], errors='coerce')
-
-        # Drop NaNs for both columns
         valid_df = df.dropna(subset=[column_name, source])
         kcat_values = valid_df[column_name]
 
@@ -796,120 +810,87 @@ def report_final(model, final_df, output_folder, shader=False) -> None:
         matched = len(kcat_values)
         match_percent = matched / total * 100 if total else 0
 
-        if not kcat_values.empty:
-            # Define log bins
-            min_exp = int(np.floor(np.log10(max(1e-6, kcat_values.min()))))
-            max_exp = int(np.ceil(np.log10(kcat_values.max())))
-            bins = np.logspace(min_exp, max_exp, num=40)
+        if kcat_values.empty:
+            return None
 
-            # Prepare data for stacked histogram
-            sources = valid_df[source].unique()
-            grouped_values = [valid_df.loc[valid_df[source] == src, column_name] for src in sources]
+        # Log bins
+        min_exp = int(np.floor(np.log10(max(1e-6, kcat_values.min()))))
+        max_exp = int(np.ceil(np.log10(kcat_values.max())))
+        bins = np.logspace(min_exp, max_exp, num=40)
 
-            # Fixed color mapping
-            color_map = {
-                "brenda": "#55bb55",   
-                "sabio_rk": "#2277cc", 
-                # "catapro": "#eedd00",  
-                "CataPro": "#eedd00",  
-                "Unknown": "#dddddd" 
-            }
+        # Databases first (fixed order), then the ML model name from the column
+        present = valid_df[source].unique()
+        sources = [s for s in DB_COLORS if s in present]
+        sources += sorted(s for s in present if s not in DB_COLORS)
 
-            label_map = {
-                "brenda": "Brenda",
-                "sabio_rk": "Sabio-RK",
-                # "catapro": "CataPro",
-                "CataPro": "CataPro",
-                "Unknown": "Unknown"
-            }
+        grouped_values = [valid_df.loc[valid_df[source] == s, column_name] for s in sources]
+        colors = [_db_color(s) for s in sources]
+        labels = [_db_label(s) for s in sources]
 
-            sources = [src for src in sources if src in valid_df[source].unique()]
-            colors = [color_map.get(src, "#999999") for src in sources]
+        fig, ax = plt.subplots(figsize=(12, 6))
+        ax.hist(grouped_values, bins=bins, stacked=True,
+                color=colors, label=labels,
+                edgecolor="white", linewidth=0.7)
 
-            # Plot
-            fig, ax = plt.subplots(figsize=(12, 6))
-            ax.hist(grouped_values, bins=bins, stacked=True,
-                    color=colors, label=[label_map[s] for s in sources],
-                    edgecolor="white", linewidth=0.7)
+        ax.set_xscale("log")
+        ax.set_xlim([10**min_exp / 1.5, 10**max_exp * 1.5])
+        ax.xaxis.set_major_formatter(LogFormatter(10))
+        ax.yaxis.set_major_locator(MaxNLocator(integer=True))
 
-            ax.set_xscale("log")
-            ax.set_xlim([10**min_exp / 1.5, 10**max_exp * 1.5])
-            ax.xaxis.set_major_formatter(LogFormatter(10))
-            ax.yaxis.set_major_locator(MaxNLocator(integer=True))
+        ax.set_xlabel("kcat (s⁻¹)", fontsize=12)
+        ax.set_ylabel("Count", fontsize=12)
+        ax.set_title(f"{title} (n={matched}, {match_percent:.1f}%)", fontsize=13)
 
-            ax.set_xlabel("kcat (s⁻¹)", fontsize=12)
-            ax.set_ylabel("Count", fontsize=12)
-            ax.set_title(f"{title} (n={matched}, {match_percent:.1f}%)", fontsize=13)
+        ax.legend(title="Source", fontsize=10, title_fontsize=11,
+                  loc="center left", bbox_to_anchor=(1, 0.5), frameon=False)
 
-            ax.legend(
-                title="Source", 
-                fontsize=10, 
-                title_fontsize=11,
-                loc='center left', 
-                bbox_to_anchor=(1, 0.5),
-                frameon=False
-            )
+        ax.spines["top"].set_visible(False)
+        ax.spines["right"].set_visible(False)
+        ax.spines["left"].set_color("#444444")
+        ax.spines["bottom"].set_color("#444444")
 
-            # Style
-            ax.spines['top'].set_visible(False)
-            ax.spines['right'].set_visible(False)
-            ax.spines['left'].set_color('#444444')
-            ax.spines['bottom'].set_color('#444444')
+        ax.grid(True, which="major", axis="y", linestyle="--", linewidth=0.6, alpha=0.4)
+        ax.grid(False, which="major", axis="x")
+        plt.tight_layout(rect=[0, 0, 0.85, 1])
 
-            ax.grid(True, which='major', axis='y', linestyle='--', linewidth=0.6, alpha=0.4)
-            ax.grid(False, which='major', axis='x') 
-            
-            plt.tight_layout(rect=[0, 0, 0.85, 1])
+        return fig_to_base64(fig)
 
-            return fig_to_base64(fig)
-
-        return "<p>No valid values available for plotting.</p>"
-    
     img_final = plot_kcat_distribution_stacked(
-        'kcat', rf"{model.id} - $k_{{\mathrm{{cat}}}}$ Distribution", "db"
+        "kcat", rf"{model.id} - $k_{{\mathrm{{cat}}}}$ Distribution", "db"
     )
-    
-    db_counts = df["db"].fillna("Unknown").value_counts()
+    if img_final is None:
+        img_final = "<p>No k<sub>cat</sub> values available.</p>"
+
+    # Progress bar by source
+    db_counts = df["db"].value_counts()
     total_db = db_counts.sum()
 
-    # Colors
-    colors = {
-        "brenda": "#55bb55",
-        "sabio_rk": "#2277cc",
-        # "catapro": "#eedd00",
-        "CataPro": "#eedd00",
-        "Unknown": "#ddd"
-    }
-
-    # Order
-    # ordered_dbs = ["brenda", "sabio_rk", "catapro", "Unknown"]
-    ordered_dbs = ["brenda", "sabio_rk", "CataPro", "Unknown"]
+    ml_models = sorted(db for db in db_counts.index if db not in DB_COLORS and db != "Unknown")
+    ordered_dbs = list(DB_COLORS) + ml_models + ["Unknown"]
 
     progress_segments = ""
     legend_items = ""
 
     for db in ordered_dbs:
         count = db_counts.get(db, 0)
-        if total_db > 0:
-            percent = count / total_db * 100
-        else:
-            percent = 0
-
-        color = colors.get(db, "#ddd")
+        percent = count / total_db * 100 if total_db > 0 else 0
+        color = _db_color(db)
+        label = _db_label(db)
 
         progress_segments += f"""
             <div class="progress-segment" style="width:{percent:.1f}%; background-color:{color};"
-                title="{db.capitalize()}: {percent:.1f}%"></div>
+                 title="{label}: {percent:.1f}%"></div>
         """
 
         legend_items += f"""
             <span style="display:flex; align-items:center; margin-right:15px; margin-bottom:5px;">
-                <span style="display:flex; align-items:center; width:16px; height:16px; 
-                            background:{color}; border:1px solid #000; margin-right:5px;"></span>
-                {db.capitalize()} ({percent:.1f}%)
+                <span style="display:flex; align-items:center; width:16px; height:16px;
+                             background:{color}; border:1px solid #000; margin-right:5px;"></span>
+                {label} ({percent:.1f}%)
             </span>
         """
 
+    # Built once, after the loop
     progress_bar = f"""
         <div class="progress-multi" style="height: 18px; margin-bottom:18px; display:flex;">
             {progress_segments}
@@ -919,18 +900,18 @@ def report_final(model, final_df, output_folder, shader=False) -> None:
         </div>
     """
 
-    # Statistics 
+    # Statistics
     grouped = df.groupby("rxn")
     rxns_with_kcat = grouped["kcat"].apply(lambda x: x.notna().any())
-    nb_reactions = df['rxn'].nunique()
+    nb_reactions = df["rxn"].nunique()
     nb_rxn_with_kcat = rxns_with_kcat.sum()
-    coverage = nb_rxn_with_kcat / nb_reactions
-    coverage_total = nb_rxn_with_kcat / nb_model_reactions
+    coverage = nb_rxn_with_kcat / nb_reactions if nb_reactions else 0
+    coverage_total = nb_rxn_with_kcat / nb_model_reactions if nb_model_reactions else 0
 
     kcat_values = df["kcat"].dropna()
     total = len(df)
     matched = len(kcat_values)
-    match_percent = matched / total
+    match_percent = matched / total if total else 0
 
     # HTML
     html = f"""
@@ -983,8 +964,7 @@ def report_final(model, final_df, output_folder, shader=False) -> None:
 
             <div class="card" style="padding:20px; margin-bottom:20px;">
                 <h2 style="margin-bottom:10px;">Coverage</h2>
-                
-                <!-- Explanation -->
+
                 <p style="text-align: justify;">
                     The coverage section reports the number of k<sub>cat</sub> values retrieved for the model and the number of reactions that have at least one 
                     associated k<sub>cat</sub> value. This provides a measure of how extensively the model’s reactions are 
@@ -996,12 +976,12 @@ def report_final(model, final_df, output_folder, shader=False) -> None:
                 </p>
 
                 <!-- Global coverage progress bar -->
-                {progress_bar}        
+                {progress_bar}
 
                 <!-- Detailed stats -->
                 <table class="table" style="width:100%; border-spacing:0; border-collapse: collapse;">
                     <tbody>
-                    <tr>
+                        <tr>
                             <td style="padding:8px 12px;">Eligible-reactions with at least one kcat value</td>
                             <td style="padding:8px 12px;">{nb_rxn_with_kcat} ({coverage:.1%})</td>
                             <td style="width:40%;">
@@ -1037,7 +1017,7 @@ def report_final(model, final_df, output_folder, shader=False) -> None:
                     </tbody>
                 </table>
             </div>
-            
+
             <div class="card">
                 <h2>k<sub>cat</sub> Distribution</h2>
                 <div class="img-section">
@@ -1050,7 +1030,7 @@ def report_final(model, final_df, output_folder, shader=False) -> None:
     """
     if shader:
         html += report_shader()
-    else: 
+    else:
         html += report_simple()
     html += """
     </body>
@@ -1058,7 +1038,7 @@ def report_final(model, final_df, output_folder, shader=False) -> None:
     """
 
     os.makedirs(os.path.join(output_folder, "reports"), exist_ok=True)
-    report_path = os.path.join(output_folder, "reports/general_report.html")
+    report_path = os.path.join(output_folder, "reports", "general_report.html")
     with open(report_path, "w", encoding="utf-8") as f:
         f.write(html)
 
