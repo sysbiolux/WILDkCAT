@@ -260,7 +260,7 @@ def run_prediction(output_folder: str,
                    canonicalize_substrates: bool = True,
                    report: bool = True) -> None:
     """
-    Processes kcat data file to generate input files for CataPro prediction.
+    Processes kcat data file to generate input files for deep-learning prediction using OpenKineticsPredictor plateform.
     Optionally, it can produce a summary report of the processed data.
 
     Parameters:
