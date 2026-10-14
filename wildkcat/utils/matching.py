@@ -204,10 +204,11 @@ def check_pH(candidate, general_criteria):
     """
     ph_min, ph_max = general_criteria["pH"]
     candidate_ph = candidate.get("pH", None)
-    if ph_min <= candidate_ph <= ph_max:
-        return 0
-    elif pd.isna(candidate_ph):
+
+    if pd.isna(candidate_ph):
         return 1
+    elif ph_min <= candidate_ph <= ph_max:
+        return 0
     else:  # Out of range
         return 2
     
@@ -220,6 +221,9 @@ def check_temperature(candidate, general_criteria, api_output, min_r2=0.8, expec
 
     temp_min, temp_max = general_criteria["Temperature"]
     candidate_temp = candidate.get("Temperature")
+
+    if pd.isna(candidate_temp):
+        return 1, 0
     
     if temp_min <= candidate_temp <= temp_max:
         return 0, 0
@@ -255,12 +259,7 @@ def check_temperature(candidate, general_criteria, api_output, min_r2=0.8, expec
                 logging.warning(f"{candidate.get('ECNumber')}: Estimated Ea ({ea:.0f} J/mol) is outside the expected range {expected_range} J/mol.")
             # Go Arrhenius
             return 0, n
-    
-    if pd.isna(candidate_temp):
-        return 1, 0
-
-    else:
-        return 2, 0
+    return 2, 0
 
 
 def check_substrate(entry, kcat_dict=None, candidate=None):

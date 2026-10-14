@@ -10,6 +10,8 @@ from tqdm import tqdm
 from functools import lru_cache 
 import pandas as pd
 
+import warnings
+
 from ..api.sabio_rk_api import get_turnover_number_sabio, get_enzyme_sabio
 from ..api.brenda_api import get_turnover_number_brenda, get_enzyme_brenda
 
@@ -41,19 +43,22 @@ def get_turnover_number(ec_code, database='both'):
         df_brenda = get_turnover_number_brenda(ec_code)
     if database in ('both', 'sabio_rk'):
         df_sabio = get_turnover_number_sabio(ec_code)
-        time.sleep(1)  
+        # time.sleep(1)  
     if database not in ('both', 'brenda', 'sabio_rk'):
         raise ValueError("Invalid database option. Choose from 'both', 'brenda', or 'sabio_rk'.")
 
     # Get columns 
-    all_columns = set(df_brenda.columns).union(df_sabio.columns)
+    all_columns = list(dict.fromkeys([*df_brenda.columns, *df_sabio.columns]))
 
     # Merge all outputs
     df_brenda = df_brenda.reindex(columns=all_columns, fill_value=None)
     df_sabio = df_sabio.reindex(columns=all_columns, fill_value=None)
+
     non_empty_dfs = [df for df in [df_brenda, df_sabio] if not df.empty]
+
     if non_empty_dfs:
-        df = pd.concat(non_empty_dfs, ignore_index=True)
+        # df = pd.concat(non_empty_dfs, ignore_index=True)
+        df = pd.concat(_align_all_na_dtypes(non_empty_dfs), ignore_index=True)
     else:
         df = pd.DataFrame(columns=list(all_columns))
     return df
@@ -92,10 +97,33 @@ def get_enzyme(enzyme_uniprot, organism, database='both'):
     df_sabio = df_sabio.reindex(columns=all_columns, fill_value=None)
     non_empty_dfs = [df for df in [df_brenda, df_sabio] if not df.empty]
     if non_empty_dfs:
-        df = pd.concat(non_empty_dfs, ignore_index=True)
+        # df = pd.concat(non_empty_dfs, ignore_index=True)
+        df = pd.concat(_align_all_na_dtypes(non_empty_dfs), ignore_index=True)
     else:
         df = pd.DataFrame(columns=list(all_columns))
     return df
+
+
+def _align_all_na_dtypes(frames: list[pd.DataFrame]) -> list[pd.DataFrame]:
+    """
+    Deals with the warning: 
+        "FutureWarning: The behavior of DataFrame concatenation with empty or all-NA entries 
+        is deprecated. In a future version, this will no longer exclude empty or all-NA columns 
+        when determining the result dtypes. To retain the old behavior, exclude the relevant 
+        entries before the concat operation."
+    """
+    frames = [f.copy() for f in frames]
+    for col in frames[0].columns:
+        populated = {f[col].dtype for f in frames if f[col].notna().any()}
+        if len(populated) != 1:
+            continue
+        (target,) = populated
+        if not pd.api.types.is_float_dtype(target):
+            continue
+        for f in frames:
+            if not f[col].notna().any():
+                f[col] = f[col].astype(target)
+    return frames
 
 
 def extract_kcat(kcat_dict, general_criteria, database='both'): 
