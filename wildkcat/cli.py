@@ -6,7 +6,7 @@ from wildkcat import run_extraction, run_retrieval, run_prediction_part1, run_pr
 
 load_dotenv()
 
-__version__ = "0.3.0"
+__version__ = "0.3.1"
 
 app = typer.Typer(help="WILDkCAT CLI - Extract, Retrieve and Predict kcat values for a metabolic model.")
 
