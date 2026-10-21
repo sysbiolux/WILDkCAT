@@ -166,7 +166,7 @@ def convert_kcat_to_per_second(df: pd.DataFrame) -> pd.DataFrame:
 
     df["value"] = df["value"] * factors
     df["unit"] = "s^(-1)"
-    df.loc[df["value"].isna(), "unit"] = None
+    df = df.dropna(subset=["value"]) 
     return df
 
 
