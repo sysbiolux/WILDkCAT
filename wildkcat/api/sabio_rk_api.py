@@ -4,10 +4,18 @@ import logging
 import pandas as pd 
 from io import StringIO
 from functools import lru_cache 
+from importlib.metadata import version, PackageNotFoundError
 
+try:
+    __version__ = version("wildkcat")
+except PackageNotFoundError:
+    __version__ = "development"
+
+HEADERS = {"User-Agent": (f"WILDkCAT/{__version__} ""(+https://github.com/sysbiolux/WILDkCAT)")}
 BASE = "https://sabiork.h-its.org/export-api/sabio/kinlaw-entry/json"
 PAGE_SIZE = 1000
 MIN_SECONDS_BETWEEN_REQUESTS = 1.1   # stays below 60 requests per minute
+
 
 # --- Sabio-RK API ---
 
@@ -19,7 +27,7 @@ def fetch_entries(q):
     """Yield every entry matching the Solr query q, following all pages."""
     page = 1
     while True:
-        r = requests.post(BASE, json={"q": q, "page": page, "pageSize": PAGE_SIZE})
+        r = requests.post(BASE, json={"q": q, "page": page, "pageSize": PAGE_SIZE}, headers=HEADERS)
         if r.status_code == 429:          # rate limit hit: wait and retry
             time.sleep(5)
             continue
