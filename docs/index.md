@@ -16,4 +16,4 @@ WILDkCAT integrates the **[BRENDA](https://www.brenda-enzymes.org/)** and **[SAB
 
 WILDkCAT is described in our article published in _Bioinformatics_:
 
-> Escoffier H, Linster CL, Sauter T. WILDkCAT: extract, retrieve, and predict enzyme turnover numbers of constraint-based metabolic models. Bioinformatics. (2026). [doi:10.1093/bioinformatics/btag510](doi:10.1093/bioinformatics/btag510)
+> Escoffier H, Linster CL, Sauter T. WILDkCAT: extract, retrieve, and predict enzyme turnover numbers of constraint-based metabolic models. Bioinformatics. (2026). [doi:10.1093/bioinformatics/btag510](https://doi.org/10.1093/bioinformatics/btag510)
